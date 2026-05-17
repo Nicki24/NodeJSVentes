@@ -1,0 +1,325 @@
+<!-- ══════════════════════════════════════════════
+     TOAST NOTIFICATIONS
+══════════════════════════════════════════════ -->
+<div class="toast-container">
+  @for (t of toasts(); track t.id) {
+    <div class="toast" [class]="t.type">
+      <i class="fa" [class.fa-check-circle]="t.type==='success'" [class.fa-times-circle]="t.type==='error'"></i>
+      {{ t.msg }}
+    </div>
+  }
+</div>
+
+<!-- ══════════════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════════════ -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <i class="fa fa-shopping-cart"></i>
+    Gestion des Ventes
+  </div>
+  <span class="navbar-date">{{ today }}</span>
+</nav>
+
+<!-- ══════════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════════ -->
+<div class="container">
+
+  <!-- ── FORMULAIRE AJOUT ── -->
+  <div class="card">
+    <div class="card-title">
+      <i class="fa fa-plus-circle"></i>
+      Ajouter une vente
+      <span class="badge">
+        Montant estimé : {{ formatMontant((form.prix || 0) * (form.quantite || 0)) }}
+      </span>
+    </div>
+
+    <form (ngSubmit)="addVente()" #venteForm="ngForm" novalidate>
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label for="numProduit"><i class="fa fa-barcode"></i> Numéro produit</label>
+          <input
+            id="numProduit"
+            type="text"
+            class="form-control"
+            [class.invalid]="submitted && !form.numProduit.trim()"
+            [(ngModel)]="form.numProduit"
+            name="numProduit"
+            placeholder="ex: PRD-001"
+            autocomplete="off"
+          />
+          @if (submitted && !form.numProduit.trim()) {
+            <span class="error-msg"><i class="fa fa-exclamation-circle"></i> Champ obligatoire</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="design"><i class="fa fa-tag"></i> Désignation</label>
+          <input
+            id="design"
+            type="text"
+            class="form-control"
+            [class.invalid]="submitted && !form.design.trim()"
+            [(ngModel)]="form.design"
+            name="design"
+            placeholder="ex: Souris optique"
+            autocomplete="off"
+          />
+          @if (submitted && !form.design.trim()) {
+            <span class="error-msg"><i class="fa fa-exclamation-circle"></i> Champ obligatoire</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="prix"><i class="fa fa-money-bill"></i> Prix unitaire (Ar)</label>
+          <input
+            id="prix"
+            type="number"
+            class="form-control"
+            [class.invalid]="submitted && form.prix <= 0"
+            [(ngModel)]="form.prix"
+            name="prix"
+            placeholder="ex: 25000"
+            min="0"
+          />
+          @if (submitted && form.prix <= 0) {
+            <span class="error-msg"><i class="fa fa-exclamation-circle"></i> Doit être supérieur à 0</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="quantite"><i class="fa fa-cubes"></i> Quantité</label>
+          <input
+            id="quantite"
+            type="number"
+            class="form-control"
+            [class.invalid]="submitted && form.quantite <= 0"
+            [(ngModel)]="form.quantite"
+            name="quantite"
+            placeholder="ex: 3"
+            min="0"
+          />
+          @if (submitted && form.quantite <= 0) {
+            <span class="error-msg"><i class="fa fa-exclamation-circle"></i> Doit être supérieur à 0</span>
+          }
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-success" id="btn-ajouter">
+          <i class="fa fa-plus"></i> Ajouter
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="resetForm()" id="btn-reset">
+          <i class="fa fa-undo"></i> Réinitialiser
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ── TABLEAU DES VENTES ── -->
+  <div class="card">
+    <div class="card-title">
+      <i class="fa fa-table"></i>
+      Tableau des ventes
+      @if (ventes().length > 0) {
+        <span class="badge">{{ ventes().length }} vente(s)</span>
+      }
+    </div>
+
+    <!-- ── Barre de recherche ── -->
+    <div class="search-bar">
+      <i class="fa fa-search"></i>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Rechercher par numéro produit ou désignation..."
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearch($event)"
+        autocomplete="off"
+      />
+      @if (searchTerm()) {
+        <button class="search-clear" (click)="onSearch('')"><i class="fa fa-times"></i></button>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="loader">
+        <i class="fa fa-spinner"></i> Chargement des ventes...
+      </div>
+    } @else if (ventes().length === 0) {
+      <div class="empty-state">
+        <i class="fa fa-inbox"></i>
+        <p>Aucune vente enregistrée.</p>
+        <small>Commencez par ajouter une vente ci-dessus.</small>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" (click)="setSort('numProduit')">
+                <i class="fa fa-hashtag"></i> N° Produit
+                <i class="fa {{ sortIcon('numProduit') }} sort-icon"></i>
+              </th>
+              <th class="sortable" (click)="setSort('design')">
+                <i class="fa fa-tag"></i> Désignation
+                <i class="fa {{ sortIcon('design') }} sort-icon"></i>
+              </th>
+              <th class="sortable" (click)="setSort('prix')">
+                <i class="fa fa-money-bill"></i> Prix (Ar)
+                <i class="fa {{ sortIcon('prix') }} sort-icon"></i>
+              </th>
+              <th class="sortable" (click)="setSort('quantite')">
+                <i class="fa fa-cubes"></i> Quantité
+                <i class="fa {{ sortIcon('quantite') }} sort-icon"></i>
+              </th>
+              <th class="sortable" (click)="setSort('montant')">
+                <i class="fa fa-calculator"></i> Montant (Ar)
+                <i class="fa {{ sortIcon('montant') }} sort-icon"></i>
+              </th>
+              <th class="sortable" (click)="setSort('created_at')">
+                <i class="fa fa-calendar"></i> Date
+                <i class="fa {{ sortIcon('created_at') }} sort-icon"></i>
+              </th>
+              <th><i class="fa fa-cogs"></i> Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (v of displayedVentes(); track v.id; let i = $index) {
+              <tr>
+                @if (editingId === v.id) {
+                  <!-- MODE ÉDITION -->
+                  <td>
+                    <input class="edit-input" [(ngModel)]="editForm.numProduit" [name]="'numP'+v.id" />
+                  </td>
+                  <td>
+                    <input class="edit-input" [(ngModel)]="editForm.design" [name]="'des'+v.id" />
+                  </td>
+                  <td>
+                    <input class="edit-input" type="number" [(ngModel)]="editForm.prix" [name]="'px'+v.id" min="1" />
+                  </td>
+                  <td>
+                    <input class="edit-input" type="number" [(ngModel)]="editForm.quantite" [name]="'qt'+v.id" min="1" />
+                  </td>
+                  <td class="montant-cell">
+                    {{ formatMontant((editForm.prix || 0) * (editForm.quantite || 0)) }}
+                  </td>
+                  <td>{{ formatDate(v.created_at) }}</td>
+                  <td>
+                    <div class="actions-cell">
+                      <button class="btn btn-success btn-sm" (click)="saveEdit(v.id!)" [id]="'btn-save-'+v.id" title="Enregistrer">
+                        <i class="fa fa-check"></i>
+                      </button>
+                      <button class="btn btn-secondary btn-sm" (click)="cancelEdit()" [id]="'btn-cancel-'+v.id" title="Annuler">
+                        <i class="fa fa-times"></i>
+                      </button>
+                    </div>
+                  </td>
+                } @else {
+                  <!-- MODE AFFICHAGE -->
+                  <td><strong>{{ v.numProduit }}</strong></td>
+                  <td>{{ v.design }}</td>
+                  <td>{{ formatMontant(v.prix) }}</td>
+                  <td>{{ v.quantite }}</td>
+                  <td class="montant-cell">{{ formatMontant(v.montant!) }}</td>
+                  <td class="date-cell">{{ formatDate(v.created_at) }}</td>
+                  <td>
+                    <div class="actions-cell">
+                      <button class="btn btn-warning btn-sm" (click)="startEdit(v)" [id]="'btn-edit-'+v.id" title="Modifier">
+                        <i class="fa fa-pencil"></i>
+                      </button>
+                      <button class="btn btn-danger btn-sm" (click)="deleteVente(v.id!, v.design)" [id]="'btn-del-'+v.id" title="Supprimer">
+                        <i class="fa fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Pagination ── -->
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button class="btn btn-pagination" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">
+            <i class="fa fa-chevron-left"></i>
+          </button>
+          @for (p of pageNumbers(); track p) {
+            <button
+              class="btn btn-pagination"
+              [class.active]="p === currentPage()"
+              (click)="goToPage(p)"
+            >{{ p }}</button>
+          }
+          <button class="btn btn-pagination" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">
+            <i class="fa fa-chevron-right"></i>
+          </button>
+          <span class="pagination-info">
+            {{ (currentPage() - 1) * pageSize + 1 }}–{{ Math.min(currentPage() * pageSize, sortedVentes().length) }} / {{ sortedVentes().length }}
+          </span>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- ── STATISTIQUES ── -->
+  <div>
+    <div class="section-title">
+      <i class="fa fa-chart-bar"></i>
+      Statistiques des ventes
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card total">
+        <div class="stat-icon"><i class="fa fa-sigma"></i></div>
+        <div class="stat-info">
+          <div class="stat-label">Montant Total</div>
+          <div class="stat-value">{{ formatMontant(stats().total) }}</div>
+        </div>
+      </div>
+      <div class="stat-card minimum">
+        <div class="stat-icon"><i class="fa fa-arrow-down"></i></div>
+        <div class="stat-info">
+          <div class="stat-label">Montant Minimal</div>
+          <div class="stat-value">{{ formatMontant(stats().min) }}</div>
+        </div>
+      </div>
+      <div class="stat-card maximum">
+        <div class="stat-icon"><i class="fa fa-arrow-up"></i></div>
+        <div class="stat-info">
+          <div class="stat-label">Montant Maximal</div>
+          <div class="stat-value">{{ formatMontant(stats().max) }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── GRAPHIQUES ── -->
+  <div>
+    <div class="section-title">
+      <i class="fa fa-chart-pie"></i>
+      Visualisation graphique
+    </div>
+    <div class="charts-grid">
+      <div class="card">
+        <div class="card-title"><i class="fa fa-bar-chart"></i> Histogramme</div>
+        <div class="chart-container">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fa fa-pie-chart"></i> Diagramme circulaire</div>
+        <div class="chart-container">
+          <canvas id="pieChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<!-- end .container -->
