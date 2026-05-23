@@ -15,7 +15,9 @@ export interface Vente {
 export interface Stats {
   total: number;
   min: number;
+  minDesign?: string;
   max: number;
+  maxDesign?: string;
 }
 
 @Injectable({ providedIn: 'root' })

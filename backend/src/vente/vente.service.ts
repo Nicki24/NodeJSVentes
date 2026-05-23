@@ -63,19 +63,34 @@ export class VenteService {
     return { message: `Vente #${id} supprimée avec succès` };
   }
 
-  // Statistiques : total, min, max
-  async getStats(): Promise<{ total: number; min: number; max: number }> {
-    const result = await this.venteRepository
+  // Statistiques : total, min, max (avec désignation)
+  async getStats(): Promise<{
+    total: number;
+    min: number;
+    minDesign: string;
+    max: number;
+    maxDesign: string;
+  }> {
+    const totalResult = await this.venteRepository
       .createQueryBuilder('vente')
       .select('SUM(vente.montant)', 'total')
-      .addSelect('MIN(vente.montant)', 'min')
-      .addSelect('MAX(vente.montant)', 'max')
       .getRawOne();
 
+    const minVente = await this.venteRepository.findOne({
+      order: { montant: 'ASC' },
+      select: ['montant', 'design'],
+    });
+    const maxVente = await this.venteRepository.findOne({
+      order: { montant: 'DESC' },
+      select: ['montant', 'design'],
+    });
+
     return {
-      total: Number(result.total) || 0,
-      min: Number(result.min) || 0,
-      max: Number(result.max) || 0,
+      total: Number(totalResult.total) || 0,
+      min: minVente ? Number(minVente.montant) : 0,
+      minDesign: minVente?.design || '',
+      max: maxVente ? Number(maxVente.montant) : 0,
+      maxDesign: maxVente?.design || '',
     };
   }
 }

@@ -1,15 +1,17 @@
-import { IsString, IsOptional, IsNumber, IsPositive, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsNotEmpty, IsNumber, IsPositive, MaxLength } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
 export class UpdateVenteDto {
   @IsOptional()
   @IsString()
+  @IsNotEmpty({ message: 'Le numéro produit est obligatoire' })
   @MaxLength(50)
   @Transform(({ value }) => value?.toString()?.trim())
   numProduit?: string;
 
   @IsOptional()
   @IsString()
+  @IsNotEmpty({ message: 'La désignation est obligatoire' })
   @MaxLength(100)
   @Transform(({ value }) => value?.toString()?.trim())
   design?: string;

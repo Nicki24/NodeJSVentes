@@ -350,6 +350,13 @@ tbody td {
   margin-top: .1rem;
 }
 
+.stat-product {
+  font-size: .8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-top: .15rem;
+}
+
 /* ── CHARTS ── */
 .charts-grid {
   display: grid;

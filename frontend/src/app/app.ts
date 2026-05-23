@@ -22,7 +22,7 @@ export class App implements OnInit {
 
   // ── État ──
   ventes    = signal<Vente[]>([]);
-  stats     = signal<Stats>({ total: 0, min: 0, max: 0 });
+  stats     = signal<Stats>({ total: 0, min: 0, minDesign: '', max: 0, maxDesign: '' });
   loading   = signal(false);
   toasts    = signal<Toast[]>([]);
   toastId   = 0;
@@ -121,12 +121,18 @@ export class App implements OnInit {
   }
 
   computeStats(ventes: Vente[]) {
-    if (!ventes.length) { this.stats.set({ total: 0, min: 0, max: 0 }); return; }
+    if (!ventes.length) { this.stats.set({ total: 0, min: 0, minDesign: '', max: 0, maxDesign: '' }); return; }
     const montants = ventes.map(v => Number(v.montant));
+    const minVal = Math.min(...montants);
+    const maxVal = Math.max(...montants);
+    const minVente = ventes.find(v => Number(v.montant) === minVal);
+    const maxVente = ventes.find(v => Number(v.montant) === maxVal);
     this.stats.set({
       total: montants.reduce((a, b) => a + b, 0),
-      min:   Math.min(...montants),
-      max:   Math.max(...montants),
+      min:   minVal,
+      minDesign: minVente?.design || '',
+      max:   maxVal,
+      maxDesign: maxVente?.design || '',
     });
   }
 
