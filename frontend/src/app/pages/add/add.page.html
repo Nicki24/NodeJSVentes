@@ -1,0 +1,149 @@
+<!-- ══ TOASTS ══ -->
+<div class="toast-container">
+  @for (t of toasts(); track t.id) {
+    <div class="toast {{ t.type }}">
+      <i class="fa" [class.fa-check-circle]="t.type==='success'" [class.fa-times-circle]="t.type==='error'"></i>
+      {{ t.msg }}
+    </div>
+  }
+</div>
+
+<div class="page-container">
+  <!-- Header page -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-icon green"><i class="fa fa-plus-circle"></i></div>
+      <div>
+        <h1 class="page-title">Ajouter une vente</h1>
+        <p class="page-subtitle">Remplissez le formulaire pour enregistrer une nouvelle vente</p>
+      </div>
+    </div>
+    <a routerLink="/sales" class="btn btn-secondary">
+      <i class="fa fa-arrow-left"></i> Retour au tableau
+    </a>
+  </div>
+
+  <div class="add-layout">
+    <!-- Formulaire -->
+    <div class="card form-card">
+      <div class="card-title">
+        <i class="fa fa-edit"></i> Informations de la vente
+        @if (montantPreview() > 0) {
+          <span class="badge-preview">
+            Montant estimé : <strong>{{ fmt(montantPreview()) }}</strong>
+          </span>
+        }
+      </div>
+
+      <form (ngSubmit)="addVente()" #venteForm="ngForm" novalidate>
+        <div class="form-grid-2">
+
+          <div class="form-group">
+            <label for="numProduit"><i class="fa fa-barcode"></i> Numéro produit</label>
+            <input
+              id="numProduit" type="text" class="form-control"
+              [class.invalid]="submitted && !form.numProduit.trim()"
+              [(ngModel)]="form.numProduit" name="numProduit"
+              placeholder="ex: PRD-005" autocomplete="off"
+            />
+            @if (submitted && !form.numProduit.trim()) {
+              <span class="error-msg"><i class="fa fa-exclamation-circle"></i> Champ obligatoire</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="design"><i class="fa fa-tag"></i> Désignation</label>
+            <input
+              id="design" type="text" class="form-control"
+              [class.invalid]="submitted && !form.design.trim()"
+              [(ngModel)]="form.design" name="design"
+              placeholder="ex: Souris optique" autocomplete="off"
+            />
+            @if (submitted && !form.design.trim()) {
+              <span class="error-msg"><i class="fa fa-exclamation-circle"></i> Champ obligatoire</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="prix"><i class="fa fa-money-bill"></i> Prix unitaire (Ar)</label>
+            <input
+              id="prix" type="number" class="form-control"
+              [class.invalid]="submitted && form.prix <= 0"
+              [(ngModel)]="form.prix" name="prix"
+              placeholder="ex: 25000" min="0"
+            />
+            @if (submitted && form.prix <= 0) {
+              <span class="error-msg"><i class="fa fa-exclamation-circle"></i> Doit être supérieur à 0</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="quantite"><i class="fa fa-cubes"></i> Quantité</label>
+            <input
+              id="quantite" type="number" class="form-control"
+              [class.invalid]="submitted && form.quantite <= 0"
+              [(ngModel)]="form.quantite" name="quantite"
+              placeholder="ex: 3" min="0"
+            />
+            @if (submitted && form.quantite <= 0) {
+              <span class="error-msg"><i class="fa fa-exclamation-circle"></i> Doit être supérieur à 0</span>
+            }
+          </div>
+
+        </div>
+
+        <!-- Calcul automatique -->
+        @if (montantPreview() > 0) {
+          <div class="montant-preview">
+            <i class="fa fa-calculator"></i>
+            Montant calculé automatiquement :
+            <span class="montant-val">{{ fmt(montantPreview()) }}</span>
+          </div>
+        }
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-success" id="btn-ajouter" [disabled]="loading()">
+            @if (loading()) {
+              <i class="fa fa-spinner fa-spin"></i> Enregistrement...
+            } @else {
+              <i class="fa fa-plus"></i> Ajouter la vente
+            }
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="resetForm()" id="btn-reset">
+            <i class="fa fa-undo"></i> Réinitialiser
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Panel d'aide -->
+    <div class="help-panel">
+      <div class="help-card">
+        <div class="help-icon"><i class="fa fa-info-circle"></i></div>
+        <h3>Comment ça marche ?</h3>
+        <ul>
+          <li><i class="fa fa-check"></i> Le <strong>numéro produit</strong> doit être unique</li>
+          <li><i class="fa fa-check"></i> Le <strong>montant</strong> est calculé automatiquement</li>
+          <li><i class="fa fa-check"></i> Le prix et la quantité doivent être supérieurs à 0</li>
+          <li><i class="fa fa-check"></i> Après ajout, vous serez redirigé vers le tableau</li>
+        </ul>
+      </div>
+
+      <div class="formula-card">
+        <div class="formula-title"><i class="fa fa-calculator"></i> Formule</div>
+        <div class="formula-body">
+          <span class="formula-part">Prix</span>
+          <span class="formula-op">×</span>
+          <span class="formula-part">Quantité</span>
+          <span class="formula-op">=</span>
+          <span class="formula-result">Montant</span>
+        </div>
+        @if (montantPreview() > 0) {
+          <div class="formula-result-live">
+            {{ form.prix | number }} × {{ form.quantite }} = <strong>{{ fmt(montantPreview()) }}</strong>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

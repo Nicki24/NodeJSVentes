@@ -33,44 +33,13 @@
   --transition:     all .22s cubic-bezier(.4,0,.2,1);
 }
 
+
 html, body {
   font-family: 'Poppins', sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   font-size: 15px;
-}
-
-/* ── NAVBAR ── */
-.navbar {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  padding: 0 2rem;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 2px 16px rgba(25,118,210,.30);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.navbar-brand {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  color: #fff;
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: .3px;
-}
-
-.navbar-brand i { font-size: 1.5rem; }
-
-.navbar-date {
-  color: rgba(255,255,255,.80);
-  font-size: .85rem;
-  font-weight: 400;
 }
 
 /* ── LAYOUT ── */
@@ -591,7 +560,6 @@ th.sortable .sort-icon {
 
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
-  .navbar { padding: 0 1rem; }
   .container { padding: 1rem; gap: 1.25rem; }
   .charts-grid { grid-template-columns: 1fr; }
   .form-grid { grid-template-columns: 1fr 1fr; }
@@ -600,6 +568,5 @@ th.sortable .sort-icon {
 
 @media (max-width: 480px) {
   .form-grid { grid-template-columns: 1fr; }
-  .navbar-date { display: none; }
   .charts-grid { grid-template-columns: 1fr; }
 }

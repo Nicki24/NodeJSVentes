@@ -1,0 +1,125 @@
+<!-- ══ TOASTS ══ -->
+<div class="page-container">
+  <!-- Header page -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-icon orange"><i class="fa fa-chart-bar"></i></div>
+      <div>
+        <h1 class="page-title">Statistiques & Graphiques</h1>
+        <p class="page-subtitle">Visualisez vos performances de vente</p>
+      </div>
+    </div>
+    <a routerLink="/sales" class="btn btn-secondary">
+      <i class="fa fa-table"></i> Voir le tableau
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="loader"><i class="fa fa-spinner fa-spin"></i> Chargement des données...</div>
+  } @else {
+
+    <!-- Stats cards -->
+    <div class="stats-grid">
+      <div class="stat-card total">
+        <div class="stat-icon"><i class="fa fa-plus"></i></div>
+        <div class="stat-info">
+          <div class="stat-label">Montant Total</div>
+          <div class="stat-value">{{ fmt(stats().total) }}</div>
+        </div>
+      </div>
+      <div class="stat-card minimum">
+        <div class="stat-icon"><i class="fa fa-arrow-down"></i></div>
+        <div class="stat-info">
+          <div class="stat-label">Montant Minimal</div>
+          <div class="stat-value">{{ fmt(stats().min) }}</div>
+          <div class="stat-product">{{ stats().minDesign }}</div>
+        </div>
+      </div>
+      <div class="stat-card maximum">
+        <div class="stat-icon"><i class="fa fa-arrow-up"></i></div>
+        <div class="stat-info">
+          <div class="stat-label">Montant Maximal</div>
+          <div class="stat-value">{{ fmt(stats().max) }}</div>
+          <div class="stat-product">{{ stats().maxDesign }}</div>
+        </div>
+      </div>
+      <div class="stat-card count">
+        <div class="stat-icon"><i class="fa fa-list"></i></div>
+        <div class="stat-info">
+          <div class="stat-label">Nombre de ventes</div>
+          <div class="stat-value">{{ ventes().length }}</div>
+          <div class="stat-product">enregistrées</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphiques -->
+    @if (ventes().length > 0) {
+      <div class="charts-grid">
+        <div class="card">
+          <div class="card-title"><i class="fa fa-bar-chart"></i> Histogramme — Total / Min / Max</div>
+          <div class="chart-container">
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fa fa-pie-chart"></i> Répartition par produit</div>
+          <div class="chart-container">
+            <canvas id="pieChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tableau récapitulatif -->
+      <div class="card recap-card">
+        <div class="card-title"><i class="fa fa-list-alt"></i> Récapitulatif détaillé</div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Produit</th>
+                <th>Désignation</th>
+                <th>Prix</th>
+                <th>Quantité</th>
+                <th>Montant</th>
+                <th>% du total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (v of ventes(); track v.id) {
+                <tr>
+                  <td><strong>{{ v.numProduit }}</strong></td>
+                  <td>{{ v.design }}</td>
+                  <td>{{ fmt(v.prix) }}</td>
+                  <td>{{ v.quantite }}</td>
+                  <td class="montant-cell">{{ fmt(v.montant!) }}</td>
+                  <td>
+                    <div class="pct-bar-wrap">
+                      <div class="pct-bar"
+                           [style.width.%]="stats().total > 0 ? (v.montant! / stats().total * 100) : 0">
+                      </div>
+                      <span>{{ stats().total > 0 ? ((v.montant! / stats().total) * 100 | number:'1.1-1') : 0 }}%</span>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="4"><strong>TOTAL</strong></td>
+                <td class="montant-cell"><strong>{{ fmt(stats().total) }}</strong></td>
+                <td><strong>100%</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <i class="fa fa-chart-bar"></i>
+        <p>Aucune donnée disponible.</p>
+        <small>Commencez par <a routerLink="/add">ajouter des ventes</a>.</small>
+      </div>
+    }
+  }
+</div>

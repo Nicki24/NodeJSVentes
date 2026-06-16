@@ -1,0 +1,42 @@
+<!-- Overlay pour mobile -->
+@if (menuOpen) {
+  <div class="sidebar-overlay" (click)="closeMenu()"></div>
+}
+
+<aside class="sidebar" [class.open]="menuOpen">
+  <!-- Brand -->
+  <a class="sidebar-brand" routerLink="/" (click)="closeMenu()">
+    <div class="brand-icon"><i class="fa fa-shopping-cart"></i></div>
+    <span class="brand-text">TechStock</span>
+  </a>
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    <span class="nav-section-title">Menu</span>
+
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="closeMenu()">
+      <i class="fa fa-home"></i>
+      <span>Accueil</span>
+    </a>
+
+    <a routerLink="/sales" routerLinkActive="active" (click)="closeMenu()">
+      <i class="fa fa-table"></i>
+      <span>Ventes</span>
+    </a>
+
+    <a routerLink="/add" routerLinkActive="active" (click)="closeMenu()">
+      <i class="fa fa-plus-circle"></i>
+      <span>Ajouter</span>
+    </a>
+
+    <a routerLink="/statistics" routerLinkActive="active" (click)="closeMenu()">
+      <i class="fa fa-chart-bar"></i>
+      <span>Statistiques</span>
+    </a>
+  </nav>
+
+  <!-- Footer de la sidebar -->
+  <div class="sidebar-footer">
+    <span class="sidebar-date">{{ today }}</span>
+  </div>
+</aside>

@@ -1,0 +1,149 @@
+<!-- ══ TOASTS ══ -->
+<div class="toast-container">
+  @for (t of toasts(); track t.id) {
+    <div class="toast {{ t.type }}">
+      <i class="fa" [class.fa-check-circle]="t.type==='success'" [class.fa-times-circle]="t.type==='error'"></i>
+      {{ t.msg }}
+    </div>
+  }
+</div>
+
+<div class="page-container">
+  <!-- Header page -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-icon blue"><i class="fa fa-table"></i></div>
+      <div>
+        <h1 class="page-title">Tableau des ventes</h1>
+        <p class="page-subtitle">Gérez, triez et recherchez vos ventes</p>
+      </div>
+    </div>
+    <a routerLink="/add" class="btn btn-success">
+      <i class="fa fa-plus"></i> Nouvelle vente
+    </a>
+  </div>
+
+  <!-- Card tableau -->
+  <div class="card">
+    <!-- Barre de recherche -->
+    <div class="search-bar">
+      <i class="fa fa-search"></i>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Rechercher par numéro produit ou désignation..."
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearch($event)"
+        autocomplete="off"
+      />
+      @if (searchTerm()) {
+        <button class="search-clear" (click)="onSearch('')"><i class="fa fa-times"></i></button>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="loader"><i class="fa fa-spinner"></i> Chargement...</div>
+    } @else if (ventes().length === 0) {
+      <div class="empty-state">
+        <i class="fa fa-inbox"></i>
+        <p>Aucune vente enregistrée.</p>
+        <small>Commencez par <a routerLink="/add">ajouter une vente</a>.</small>
+      </div>
+    } @else {
+      <!-- Badge résultats -->
+      <div class="results-info">
+        <span class="badge">{{ sortedVentes().length }} résultat(s)</span>
+        @if (searchTerm()) {
+          <span class="filter-tag">Filtre : "{{ searchTerm() }}"</span>
+        }
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" (click)="setSort('numProduit')">
+                <i class="fa fa-hashtag"></i> N° Produit
+                <i class="fa {{ sortIcon('numProduit') }} sort-icon"></i>
+              </th>
+              <th class="sortable" (click)="setSort('design')">
+                <i class="fa fa-tag"></i> Désignation
+                <i class="fa {{ sortIcon('design') }} sort-icon"></i>
+              </th>
+              <th class="sortable" (click)="setSort('prix')">
+                <i class="fa fa-money-bill"></i> Prix (Ar)
+                <i class="fa {{ sortIcon('prix') }} sort-icon"></i>
+              </th>
+              <th class="sortable" (click)="setSort('quantite')">
+                <i class="fa fa-cubes"></i> Qté
+                <i class="fa {{ sortIcon('quantite') }} sort-icon"></i>
+              </th>
+              <th class="sortable" (click)="setSort('montant')">
+                <i class="fa fa-calculator"></i> Montant (Ar)
+                <i class="fa {{ sortIcon('montant') }} sort-icon"></i>
+              </th>
+              <th class="sortable" (click)="setSort('created_at')">
+                <i class="fa fa-calendar"></i> Date
+                <i class="fa {{ sortIcon('created_at') }} sort-icon"></i>
+              </th>
+              <th><i class="fa fa-cogs"></i> Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (v of displayedVentes(); track v.id) {
+              <tr>
+                @if (editingId === v.id) {
+                  <!-- MODE ÉDITION -->
+                  <td><input class="edit-input" [(ngModel)]="editForm.numProduit" [name]="'numP'+v.id" /></td>
+                  <td><input class="edit-input" [(ngModel)]="editForm.design"     [name]="'des'+v.id"  /></td>
+                  <td><input class="edit-input" type="number" [(ngModel)]="editForm.prix"     [name]="'px'+v.id" min="1" /></td>
+                  <td><input class="edit-input" type="number" [(ngModel)]="editForm.quantite" [name]="'qt'+v.id" min="1" /></td>
+                  <td class="montant-cell">{{ fmt((editForm.prix||0) * (editForm.quantite||0)) }}</td>
+                  <td>{{ fmtDate(v.created_at) }}</td>
+                  <td>
+                    <div class="actions-cell">
+                      <button class="btn btn-success btn-sm" (click)="saveEdit(v.id!)"  [id]="'btn-save-'+v.id"   title="Enregistrer"><i class="fa fa-check"></i></button>
+                      <button class="btn btn-secondary btn-sm" (click)="cancelEdit()"   [id]="'btn-cancel-'+v.id" title="Annuler">   <i class="fa fa-times"></i></button>
+                    </div>
+                  </td>
+                } @else {
+                  <!-- MODE AFFICHAGE -->
+                  <td><strong>{{ v.numProduit }}</strong></td>
+                  <td>{{ v.design }}</td>
+                  <td>{{ fmt(v.prix) }}</td>
+                  <td>{{ v.quantite }}</td>
+                  <td class="montant-cell">{{ fmt(v.montant!) }}</td>
+                  <td class="date-cell">{{ fmtDate(v.created_at) }}</td>
+                  <td>
+                    <div class="actions-cell">
+                      <button class="btn btn-warning btn-sm" (click)="startEdit(v)"          [id]="'btn-edit-'+v.id" title="Modifier"> <i class="fa fa-pencil"></i></button>
+                      <button class="btn btn-danger  btn-sm" (click)="deleteVente(v.id!, v.design)" [id]="'btn-del-'+v.id"  title="Supprimer"><i class="fa fa-trash"></i></button>
+                    </div>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button class="btn btn-pagination" [disabled]="currentPage()===1" (click)="goToPage(currentPage()-1)">
+            <i class="fa fa-chevron-left"></i>
+          </button>
+          @for (p of pageNumbers(); track p) {
+            <button class="btn btn-pagination" [class.active]="p===currentPage()" (click)="goToPage(p)">{{ p }}</button>
+          }
+          <button class="btn btn-pagination" [disabled]="currentPage()===totalPages()" (click)="goToPage(currentPage()+1)">
+            <i class="fa fa-chevron-right"></i>
+          </button>
+          <span class="pagination-info">
+            {{ (currentPage()-1)*pageSize+1 }}–{{ Math.min(currentPage()*pageSize, sortedVentes().length) }} / {{ sortedVentes().length }}
+          </span>
+        </div>
+      }
+    }
+  </div>
+</div>

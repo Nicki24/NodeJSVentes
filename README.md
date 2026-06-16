@@ -1,4 +1,4 @@
-# Gestion des Ventes
+# TechStock
 
 Application web moderne de **gestion des ventes** développée avec **NestJS** (backend) et **Angular** (frontend), utilisant **MySQL** comme base de données.
 
@@ -21,11 +21,14 @@ Application web moderne de **gestion des ventes** développée avec **NestJS** (
 
 ## Captures d'écran
 
-### Interface principale
-![Interface](pictures/Capture%20d'écran%202026-05-17%20122143.png)
+### Dashboard
+![Dashboard](pictures/Capture%20d'écran%202026-06-16%20100637.png)
 
-### Graphiques et statistiques
-![Graphiques](pictures/Capture%20d'écran%202026-05-17%20122231.png)
+### Tableau des ventes
+![Tableau des ventes](pictures/Capture%20d'écran%202026-06-16%20100702.png)
+
+### Statistiques et graphiques
+![Statistiques](pictures/Capture%20d'écran%202026-06-16%20100726.png)
 
 ## Prérequis
 

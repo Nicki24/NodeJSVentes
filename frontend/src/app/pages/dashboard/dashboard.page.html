@@ -1,0 +1,122 @@
+<!-- ══ HERO SECTION ══ -->
+<div class="dashboard-hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <i class="fa fa-shopping-cart"></i> TechStock
+    </div>
+    <h1 class="hero-title">
+      Votre tableau de bord<br>
+      <span class="hero-accent">professionnel</span>
+    </h1>
+    <p class="hero-subtitle">
+      Gérez vos ventes, analysez vos performances et visualisez vos données en temps réel.
+    </p>
+
+    <!-- Live stats rapides -->
+    @if (!loading()) {
+      @if (!error()) {
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-value">{{ count() }}</span>
+            <span class="hero-stat-label">Ventes</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">{{ fmt(stats().total) }}</span>
+            <span class="hero-stat-label">Total</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">{{ fmt(stats().max) }}</span>
+            <span class="hero-stat-label">Maximum</span>
+          </div>
+        </div>
+      } @else {
+        <div class="hero-error">
+          <i class="fa fa-exclamation-triangle"></i>
+          Serveur non disponible — démarrez le backend NestJS
+        </div>
+      }
+    } @else {
+      <div class="hero-loading">
+        <i class="fa fa-spinner fa-spin"></i> Chargement des données...
+      </div>
+    }
+  </div>
+
+  <!-- Décoration flottante -->
+  <div class="hero-decoration">
+    <div class="deco-circle c1"></div>
+    <div class="deco-circle c2"></div>
+    <div class="deco-circle c3"></div>
+  </div>
+</div>
+
+<!-- ══ NAVIGATION CARDS ══ -->
+<div class="dashboard-container">
+  <div class="section-header">
+    <h2><i class="fa fa-th-large"></i> Navigation rapide</h2>
+    <p>Choisissez une section pour commencer</p>
+  </div>
+
+  <div class="nav-cards-grid">
+    @for (card of cards; track card.route) {
+      <a [routerLink]="card.route" class="nav-card {{ card.color }}">
+        <div class="nav-card-icon">
+          <i class="fa {{ card.icon }}"></i>
+        </div>
+        <div class="nav-card-body">
+          <h3 class="nav-card-title">{{ card.label }}</h3>
+          <p class="nav-card-desc">{{ card.description }}</p>
+        </div>
+        <div class="nav-card-arrow">
+          <i class="fa fa-arrow-right"></i>
+        </div>
+        <div class="nav-card-cta">{{ card.cta }} →</div>
+      </a>
+    }
+  </div>
+
+  <!-- ══ STATS DÉTAILLÉES ══ -->
+  @if (!loading() && !error() && count() > 0) {
+    <div class="section-header" style="margin-top:2.5rem">
+      <h2><i class="fa fa-chart-line"></i> Aperçu des performances</h2>
+      <p>Statistiques calculées en temps réel</p>
+    </div>
+
+    <div class="overview-grid">
+      <div class="overview-card blue">
+        <div class="overview-icon"><i class="fa fa-plus"></i></div>
+        <div class="overview-info">
+          <div class="overview-label">Montant Total</div>
+          <div class="overview-value">{{ fmt(stats().total) }}</div>
+        </div>
+      </div>
+      <div class="overview-card green">
+        <div class="overview-icon"><i class="fa fa-arrow-down"></i></div>
+        <div class="overview-info">
+          <div class="overview-label">Minimum</div>
+          <div class="overview-value">{{ fmt(stats().min) }}</div>
+          <div class="overview-sub">{{ stats().minDesign }}</div>
+        </div>
+      </div>
+      <div class="overview-card orange">
+        <div class="overview-icon"><i class="fa fa-arrow-up"></i></div>
+        <div class="overview-info">
+          <div class="overview-label">Maximum</div>
+          <div class="overview-value">{{ fmt(stats().max) }}</div>
+          <div class="overview-sub">{{ stats().maxDesign }}</div>
+        </div>
+      </div>
+      <div class="overview-card purple">
+        <div class="overview-icon"><i class="fa fa-list"></i></div>
+        <div class="overview-info">
+          <div class="overview-label">Nombre de ventes</div>
+          <div class="overview-value">{{ count() }}</div>
+          <div class="overview-sub">enregistrées</div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
